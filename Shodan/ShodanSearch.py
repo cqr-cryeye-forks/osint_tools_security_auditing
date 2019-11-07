@@ -51,7 +51,7 @@ def cli_parser():
 
 def create_shodan_object():
     # Add your shodan API key here
-    api_key = "v4YpsPUJ3wjDxEqywwu6aF5OZKWj8kik"
+    api_key = "fwpsFkHzz3dLI8BysZyYQ9CUexcdWVGq"
 
     shodan_object = shodan.Shodan(api_key)
 

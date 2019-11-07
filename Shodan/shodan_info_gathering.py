@@ -4,7 +4,7 @@ import argparse
 
 def get_shodan_data(target):
     
-    SHODAN_API_KEY = "v4YpsPUJ3wjDxEqywwu6aF5OZKWj8kik"
+    SHODAN_API_KEY = "fwpsFkHzz3dLI8BysZyYQ9CUexcdWVGq"
     
     api = shodan.Shodan(SHODAN_API_KEY)
     

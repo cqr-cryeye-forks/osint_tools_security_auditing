@@ -14,11 +14,11 @@ def get_emails(domain):
     emails = set(emails)
     result = []
     for email in emails:
-        if validate_email(email):
-            result.append({'valid': 'exists', 'value': str(email)})
-        else:
-            result.append({'valid': "doesn't exist", 'value': str(email)})
-    print result
+        result.append({'valid': validate_email(email), 'value': str(email)})
+    if not result:
+        print "no emails"
+    else:
+        print result
 
 
 if __name__ == "__main__":

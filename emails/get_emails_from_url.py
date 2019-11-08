@@ -15,7 +15,7 @@ def get_emails(domain):
     result = []
     for email in emails:
         if validate_email(email):
-            result.append({'valid': exists, 'value': str(email)})
+            result.append({'valid': 'exists', 'value': str(email)})
         else:
             result.append({'valid': "doesn't exist", 'value': str(email)})
     print result

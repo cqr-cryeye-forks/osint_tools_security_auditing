@@ -5,9 +5,6 @@ from validate_email import validate_email
 
 
 def get_emails(domain):
-    if not domain.startswith("http://") == True:
-        domain = "http://" + domain
-
     response = requests.get(domain)
     text = response.text
     emails = re.findall(r"\w+[a-zA-Z_0-9]+@\w+\.\w+", text)

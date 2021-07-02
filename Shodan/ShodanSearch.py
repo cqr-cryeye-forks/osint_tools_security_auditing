@@ -14,7 +14,6 @@ import sys
 
 
 def cli_parser():
-
     # Command line argument parser
     parser = argparse.ArgumentParser(
         add_help=False,
@@ -59,7 +58,6 @@ def create_shodan_object():
 
 
 def shodan_cidr_search(shodan_search_object, shodan_search_cidr, input_file_ips):
-
     title()
 
     if shodan_search_cidr is not False:
@@ -117,7 +115,6 @@ def shodan_cidr_search(shodan_search_object, shodan_search_cidr, input_file_ips)
 
 
 def shodan_ip_search(shodan_search_object, shodan_search_ip):
-
     title()
 
     if validate_ip(shodan_search_ip):
@@ -142,15 +139,15 @@ def shodan_ip_search(shodan_search_object, shodan_search_ip):
                 print("Banner: " + item['data'])
 
         except Exception as e:
-                if str(e).strip() == "API access denied":
-                    print("You provided an invalid API Key!")
-                    print("Please provide a valid API Key and re-run!")
-                    sys.exit()
-                elif str(e).strip() == "No information available for that IP.":
-                    print("No information on Shodan about " +\
-                        str(shodan_search_ip))
-                else:
-                    print("[*]Unknown Error: " + str(e))
+            if str(e).strip() == "API access denied":
+                print("You provided an invalid API Key!")
+                print("Please provide a valid API Key and re-run!")
+                sys.exit()
+            elif str(e).strip() == "No information available for that IP.":
+                print("No information on Shodan about " + \
+                      str(shodan_search_ip))
+            else:
+                print("[*]Unknown Error: " + str(e))
 
     else:
         print("[*]ERROR: You provided an invalid IP address!")
@@ -160,7 +157,6 @@ def shodan_ip_search(shodan_search_object, shodan_search_ip):
 
 def shodan_string_search(shodan_search_object, shodan_search_string,
                          hostname_only, page_to_return):
-
     title()
 
     # Try/catch for searching the shodan api
@@ -172,8 +168,8 @@ def shodan_string_search(shodan_search_object, shodan_search_string,
             shodan_search_string, page=page_to_return)
 
         if not hostname_only:
-            print("Total number of results back: " +\
-                str(results['total']) + "\n")
+            print("Total number of results back: " + \
+                  str(results['total']) + "\n")
 
         for result in results['matches']:
             if hostname_only:
@@ -253,8 +249,8 @@ def validate_ip(val_ip):
 if __name__ == '__main__':
 
     # Parse command line options
-    search_string, search_ip, search_cidr, search_hostnameonly,\
-        search_page_number, search_file = cli_parser()
+    search_string, search_ip, search_cidr, search_hostnameonly, \
+    search_page_number, search_file = cli_parser()
 
     # Create object used to search Shodan
     shodan_api_object = create_shodan_object()

@@ -2,20 +2,18 @@ import shodan
 import requests
 import argparse
 
-def get_shodan_data(target):
-    
-    SHODAN_API_KEY = "fwpsFkHzz3dLI8BysZyYQ9CUexcdWVGq"
-    
-    api = shodan.Shodan(SHODAN_API_KEY)
-    
-    dnsResolve = 'https://api.shodan.io/dns/resolve?hostnames=' + target + '&key=' + SHODAN_API_KEY
 
+def get_shodan_data(target):
+    SHODAN_API_KEY = "fwpsFkHzz3dLI8BysZyYQ9CUexcdWVGq"
+
+    api = shodan.Shodan(SHODAN_API_KEY)
+
+    dnsResolve = 'https://api.shodan.io/dns/resolve?hostnames=' + target + '&key=' + SHODAN_API_KEY
 
     try:
         # First we need to resolve our targets domain to an IP
         resolved = requests.get(dnsResolve)
         hostIP = resolved.json()[target]
-   
 
         # Then we need to do a Shodan search on that IP
         host = api.host(hostIP)
@@ -23,16 +21,14 @@ def get_shodan_data(target):
         print("Organization: %s" % host.get('org', 'n/a'))
         print("Operating System: %s" % host.get('os', 'n/a'))
 
-
         # Print all banners
         for item in host['data']:
             print("Port: %s" % item['port'])
             print("Banner: %s" % item['data'])
-        
 
         # Print vuln information
         for item in host['vulns']:
-            CVE = item.replace('!','')
+            CVE = item.replace('!', '')
             print('Vulns: %s' % item)
             exploits = api.exploits.search(CVE)
             for item in exploits['matches']:
@@ -47,5 +43,5 @@ if __name__ == "__main__":
     # Main arguments
     parser.add_argument("-target", dest="target", help="target IP / domain", required=True)
     args = parser.parse_args()
-                
-    get_shodan_data(args.target)       
+
+    get_shodan_data(args.target)

@@ -16,9 +16,9 @@ def get_emails(domain):
         else:
             result.append({"valid": "does not exist", "value": str(email)})
     if not result:
-        print "no emails"
+        print("no emails")
     else:
-        print result
+        print(result)
 
 
 if __name__ == "__main__":

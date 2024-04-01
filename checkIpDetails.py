@@ -4,6 +4,8 @@ import argparse
 import json
 import logging
 import os
+import pathlib
+from typing import Final
 
 import dns.resolver
 import geoip2
@@ -108,7 +110,8 @@ def getGeo(domain):
     ip = ip_resolver(domain)
     response = ''
     if not os.path.exists('GeoLite2-City.mmdb'):
-        msg = "[*] GeoLite2-City.mmdb is not found ..." + logging.error(msg)
+        msg = "[*] GeoLite2-City.mmdb is not found ..."
+        logging.error(msg)
     else:
         try:
             reader = geoip2.database.Reader('GeoLite2-City.mmdb')
@@ -127,7 +130,7 @@ def ip_resolver(domain):
     resolver = dns.resolver.Resolver()
     resolver.timeout = 1
     try:
-        answers = resolver.query(domain)
+        answers = dns.resolver.Resolver.resolve(domain)
         ip = str(answers[0]).split(": ")[0]
         c_name = answers.canonical_name
     except Exception as e:
@@ -144,9 +147,15 @@ if __name__ == "__main__":
     general.add_argument('-d', '--domain', metavar='<ip_or_domain>', action='store',
                          help='query to be resolved by ip-api.com.')
     args = parser.parse_args()
+    target: str = args.domain
 
-    print(json.dumps(checkIpDetails(args.domain), indent=2))
+    PATH_TO_OUTPUT_DIR: Final[pathlib.Path] = pathlib.Path(__file__).parent
+    output_json = PATH_TO_OUTPUT_DIR / 'data.json'
 
+    result = checkIpDetails(target)
+
+    with open(output_json, 'w') as json_file:
+        json.dump(result, json_file, indent=2)
     try:
         response = getGeo(args.domain)
         if response is not None:
@@ -160,4 +169,4 @@ if __name__ == "__main__":
     except Exception as e:
         pass
 
-    ip_resolver(args.domain)
+    ip_resolver(target)

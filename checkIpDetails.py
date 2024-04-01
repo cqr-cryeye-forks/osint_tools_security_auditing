@@ -99,11 +99,12 @@ def checkIpDetails(query=None):
                         aux["value"] = value
                         # Appending to the list of results                        
                         jsonData.append(aux)
-
+        elif jsonData == []:
+            jsonData = {"Error": "Invalid value"}
         return jsonData
     except:
         # No information was found, then we return a null entity
-        return {}
+        return {"Error": "Invalid value"}
 
 
 def getGeo(domain):

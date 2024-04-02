@@ -2,6 +2,9 @@
 # coding=UTF-8
 
 import argparse
+import json
+import pathlib
+from typing import Final
 
 import pygeoip
 
@@ -9,20 +12,33 @@ import pygeoip
 class Geoip:
     def __init__(self, target):
         self.target = target
-        self.gip = pygeoip.GeoIP('ip_map_position/GeoLiteCity.dat', pygeoip.MEMORY_CACHE)
+        self.gip = pygeoip.GeoIP(PATH_TO_OUTPUT_DIR / 'GeoLiteCity.dat', pygeoip.MEMORY_CACHE)
         self.search()
 
     def search(self):
         addr = self.target
         rec = self.gip.record_by_addr(addr)
-        for key, val in rec.items():
-            print("%s: %s" % (key, val))
+        return rec
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Geo localizate IP addresses')
-    parser.add_argument('--target', action="store", dest="target", required=True)
-    given_args = parser.parse_args()
-    target = given_args.target
+
+    parser.add_argument('--target', help='domain or url')
+    parser.add_argument('--output', help='output file data.json')
+
+    args = parser.parse_args()
+
+    if args.target is None or args.output is None:
+        parser.error('You need write two args: --target и --output')
+
+    target: str = args.target
+    output: str = args.output
+
+    PATH_TO_OUTPUT_DIR: Final[pathlib.Path] = pathlib.Path(__file__).parent
+    output_json = PATH_TO_OUTPUT_DIR / output
+
     geoip = Geoip(target)
-    geoip.search()
+    data = geoip.search()
+    with open(output_json, "w") as jf:
+        json.dump(data, jf, indent=4)

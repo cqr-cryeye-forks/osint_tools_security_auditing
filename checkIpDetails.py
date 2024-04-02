@@ -128,8 +128,8 @@ def getGeo(domain):
 def ip_resolver(domain):
     ip = ''
     c_name = ''
-    resolver = dns.resolver.Resolver()
-    resolver.timeout = 1
+    res = dns.resolver.Resolver()
+    res.timeout = 1
     try:
         answers = dns.resolver.Resolver.resolve(domain)
         ip = str(answers[0]).split(": ")[0]
@@ -141,32 +141,36 @@ def ip_resolver(domain):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Makes a search onto ip-api.com.', prog='checkIPDetails.py', epilog="",
-                                     add_help=False)
-    # Adding the main options
-    general = parser.add_mutually_exclusive_group(required=True)
-    general.add_argument('-d', '--domain', metavar='<ip_or_domain>', action='store',
-                         help='query to be resolved by ip-api.com.')
+    parser = argparse.ArgumentParser(description='Check IP or Domain details')
+
+    parser.add_argument('-d', '--domain', help='query to be resolved by ip-api.com.')
+    parser.add_argument('-o', '--output', help='output file data.json')
+
     args = parser.parse_args()
+
+    if args.domain is None or args.output is None:
+        parser.error('You need write two args: -d/--domain и -o/--output')
+
     target: str = args.domain
+    output: str = args.output
 
     PATH_TO_OUTPUT_DIR: Final[pathlib.Path] = pathlib.Path(__file__).parent
-    output_json = PATH_TO_OUTPUT_DIR / 'data.json'
+    output_json = PATH_TO_OUTPUT_DIR / output
 
     result = checkIpDetails(target)
 
     with open(output_json, 'w') as json_file:
         json.dump(result, json_file, indent=2)
     try:
-        response = getGeo(args.domain)
-        if response is not None:
-            if response.country is not None:
-                print('\nCountry:' + response.country.name)
-            if response.city is not None:
-                print('\nCity:' + response.city.name)
-            if response.location is not None:
-                print('\nLatitude' + str(response.location.latitude))
-                print('\nLongitude' + str(response.location.longitude))
+        response = getGeo(target)
+        # if response is not None:
+        #     if response.country is not None:
+        #         print('\nCountry:' + response.country.name)
+        #     if response.city is not None:
+        #         print('\nCity:' + response.city.name)
+        #     if response.location is not None:
+        #         print('\nLatitude' + str(response.location.latitude))
+        #         print('\nLongitude' + str(response.location.longitude))
     except Exception as e:
         pass
 

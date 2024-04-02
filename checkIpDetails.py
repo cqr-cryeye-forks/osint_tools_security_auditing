@@ -7,6 +7,7 @@ import os
 import pathlib
 import re
 from typing import Final
+from urllib.parse import urlparse
 
 import dns.resolver
 import geoip2
@@ -132,6 +133,16 @@ def is_ipv4(address):
         return False
 
 
+def extract_domain(url):
+    if not url.startswith('http://') and not url.startswith('https://'):
+        url = 'http://' + url
+    parsed_url = urlparse(url)
+    domain = parsed_url.netloc
+    if domain.startswith('www.'):
+        domain = domain[4:]
+    return domain
+
+
 def ip_resolver(domain):
     ip = ''
     c_name = ''
@@ -168,6 +179,7 @@ if __name__ == "__main__":
     PATH_TO_OUTPUT_DIR: Final[pathlib.Path] = pathlib.Path(__file__).parent
     output_json = PATH_TO_OUTPUT_DIR / output
 
+    target = extract_domain(target)
     res = checkIpDetails(target)
 
     try:

@@ -2,21 +2,22 @@ import argparse
 import codecs
 import csv
 import json
+import pathlib
+from typing import Final
 
 import requests
 from bs4 import BeautifulSoup
 
-# parse the command line arguments
-ap = argparse.ArgumentParser()
-ap.add_argument("-d", "--domain", required=True, help="The domain to target ie. cnn.com")
-args = vars(ap.parse_args())
 
-domain = args['domain']
+def csv_to_json(csv_file, json_file):
+    with open(csv_file, 'r', newline='') as csvfile:
+        csv_reader = csv.DictReader(csvfile)
+        data = []
+        for row in csv_reader:
+            data.append(row)
 
-# list of available indices
-# http://index.commoncrawl.org
-
-index_list = ["2016-36"]
+    with open(json_file, 'w') as jsonfile:
+        json.dump(data, jsonfile, indent=4)
 
 
 #
@@ -24,6 +25,7 @@ index_list = ["2016-36"]
 #
 def search_domain(domain):
     record_list = []
+    index_list = ["2016-36"]
 
     print("[*] Trying target domain: %s" % domain)
 
@@ -54,15 +56,18 @@ def search_domain(domain):
 # Download Page
 #
 def download_page(url):
-    response = requests.get('http://' + url)
-
+    https = 'http://'
+    if not url.startswith(https):
+        response = requests.get(https + url)
+    else:
+        response = requests.get(url)
     print(response)
 
     return response.text
 
 
 #
-# Extract links from the HTML  
+# Extract links from the HTML
 #
 def extract_external_links(html_content, link_list):
     try:
@@ -77,41 +82,65 @@ def extract_external_links(html_content, link_list):
 
                 if href is not None:
 
-                    if domain not in href:
+                    if target not in href:
                         if href not in link_list and href.startswith("http"):
                             print("[*] Discovered external link: %s" % href)
                             link_list.append(href)
 
         return link_list
-
     except Exception as e:
         print(e)
         pass
 
 
-record_list = [domain]
-link_list = []
-search_domain_list = []
+def main():
+    link_list = []
+    record_list = [target]
+    for record in record_list:
+        html_content = download_page(record)
 
-for record in record_list:
-    html_content = download_page(record)
+        print("[*] Retrieved %d bytes for %s" % (len(html_content), record))
 
-    print("[*] Retrieved %d bytes for %s" % (len(html_content), record))
+        link_list = extract_external_links(html_content.encode('ascii', 'ignore'), link_list)
 
-    link_list = extract_external_links(html_content.encode('ascii', 'ignore'), link_list)
+    print("[*] Total external links discovered: %d" % len(link_list))
 
-print("[*] Total external links discovered: %d" % len(link_list))
+    with codecs.open("data.csv", "w", encoding="utf-8") as cf:
+        fields = ["URL"]
 
-with codecs.open("%s-links.csv" % domain, "w", encoding="utf-8") as output:
-    fields = ["URL"]
+        logger = csv.DictWriter(cf, fieldnames=fields)
+        logger.writeheader()
 
-    logger = csv.DictWriter(output, fieldnames=fields)
-    logger.writeheader()
+        for link in link_list:
+            logger.writerow({"URL": link})
 
-    for link in link_list:
-        logger.writerow({"URL": link})
+        search_domain_list = search_domain(target) or []
+        for link in search_domain_list:
+            logger.writerow({"URL": link['url']})
 
-    search_domain_list = search_domain(domain)
+    csv_to_json(output_csv, output_json)
 
-    for link in search_domain_list:
-        logger.writerow({"URL": link['url']})
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--domain", help="The domain to target ie. cnn.com")
+    parser.add_argument('--output', help='output file data.json.')
+
+    args = parser.parse_args()
+
+    if args.domain is None or args.output is None:
+        parser.error('You need write two args: -d/--domain и -o/--output')
+
+    target: str = args.domain
+    output: str = args.output
+
+    PATH_TO_OUTPUT_DIR: Final[pathlib.Path] = pathlib.Path(__file__).parent
+    output_json = PATH_TO_OUTPUT_DIR / output
+    json_csv = output[:-4] + "csv"
+    output_csv = PATH_TO_OUTPUT_DIR / json_csv
+    # list of available indices
+    # http://index.commoncrawl.org
+
+    # # #
+    main()
+    # # #

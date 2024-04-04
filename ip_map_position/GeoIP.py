@@ -1,11 +1,10 @@
 #!/usr/bin/env python3.5
 # coding=UTF-8
 
+from typing import Final
 import argparse
 import json
 import pathlib
-from typing import Final
-
 import pygeoip
 
 

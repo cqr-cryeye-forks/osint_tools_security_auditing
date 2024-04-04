@@ -148,10 +148,6 @@ def ip_resolver(domain):
     c_name = ''
     res = dns.resolver.Resolver()
     res.timeout = 1
-    # if is_ipv4(domain):
-    #     print("ipv4")
-    # else:
-    #     print("domain")
     try:
         answers = dns.resolver.resolve(domain)
         ip = str(answers[0]).split(": ")[0]
